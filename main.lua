@@ -33,7 +33,7 @@ function resetClearWeather()
 	setWeather(originalWeather)
 end
 
-local opcodesDef = {"00A4:","00FE:","0395:","00FF:","01A6:","8100:","81AC:","80FE:"}
+local opcodesDef = {"00A4:","00FE:","0395:","00FF:","01A6:","8100:","81AC:","80FE:","00B0:","03BA:"}
 local gui = {}
 local markers = {}
 local blips = {}

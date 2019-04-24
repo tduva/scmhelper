@@ -4,7 +4,7 @@ This is a Ressource for MTA:SA (https://mtasa.com/) to visualize some opcodes fr
 
 ## Installation
 
-Download a .zip of this repository and put that into your resources folder, for example `C:\Program Files (x86)\MTA San Andreas 1.5\server\mods\deathmatch\resources`.
+Put the contents of this repository into a subfolder called "scmhelper" in your resources folder, for example `C:\Program Files (x86)\MTA San Andreas 1.5\server\mods\deathmatch\resources\scmhelper`.
 
 ## Usage
 

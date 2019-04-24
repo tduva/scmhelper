@@ -33,7 +33,6 @@ function resetClearWeather()
 	setWeather(originalWeather)
 end
 
-local opcodesDef = {"00A4:","00FE:","0395:","00FF:","01A6:","8100:","81AC:","80FE:","00B0:","03BA:"}
 local gui = {}
 local markers = {}
 local blips = {}
@@ -57,6 +56,8 @@ function closeGui()
 	guiSetVisible(gui.window, false)
 	guiSetInputEnabled(false)
 	if wasFreecamEnabled then
+		-- Unfortunately this doesn't really work, since setFreecamEnabled doesn't take lookAt coordinates
+		-- (and it doesn't even take the angle from getCameraMatrix() but rather holds it in it's own variable)
 		exports.freecam:setFreecamEnabled()
 	end
 	showCursor(false)
@@ -127,15 +128,11 @@ local function cameraToSelected()
 		return
 	end
 	local x,y,z = getElementPosition(marker)
-	local freecamEnabled = false
+	local radius = 100
 	if exports.freecam:isFreecamEnabled() then
 		exports.freecam:setFreecamDisabled()
-		freecamEnabled = true
 	end
-	setCameraMatrix(x+30,y+30,z+20,x,y,z)
-	if freecamEnabled then
-		exports.freecam:setFreecamEnabled(x+20,y+20,z+20,x,y,z)
-	end
+	setCameraMatrix(x+radius,y+radius,z+radius,x,y,z)
 end
 
 local function clearPreview()
@@ -198,7 +195,6 @@ local function updateList()
 			guiGridListSetItemText(gui.list, row, gui.codeColumn, line, false, false)
 		end
 		if checkForCoordinates ~= nil then
-			outputChatBox(checkForCoordinates)
 			coordinates[#coordinates+1] = tonumber(checkForCoordinates)
 			if #coordinates == 3 then
 				local row = guiGridListAddRow(gui.list)
@@ -212,6 +208,7 @@ local function updateList()
 		linePosition[i] = textPos
 		textPos = textPos + line:len() + 1 -- Add 1 to adjust for linebreaks
 	end
+	guiSetSelectedTab(gui.tabs, gui.tabList)
 end
 
 
@@ -351,26 +348,26 @@ function createGui()
 	gui.tabSettings = guiCreateTab("Settings/Help",gui.tabs)
 
 	-- Code
-	gui.code = guiCreateMemo(0, 0, 1000, 450, "00FE:   actor $PLAYER_ACTOR sphere 0 in_sphere 812.4495 -1343.488 12.532 radius 80.0 80.0 20.0 // Must be in this area to spawn taxi\n00A4:   actor $PLAYER_ACTOR sphere 0 in_cube_cornerA 685.9716 -1433.523 11.0857 cornerB 965.9512 -1379.386 14.9731 // If in this area, then the taxi spawns in the north", false, gui.tabCode)
-	gui.parseButton = guiCreateButton(0, 450, 1000, 30, "Parse", false, gui.tabCode)
+	gui.code = guiCreateMemo(1, 1, 980, 440, "00FE:   actor $PLAYER_ACTOR sphere 0 in_sphere 812.4495 -1343.488 12.532 radius 80.0 80.0 20.0 // Must be in this area to spawn taxi\n00A4:   actor $PLAYER_ACTOR sphere 0 in_cube_cornerA 685.9716 -1433.523 11.0857 cornerB 965.9512 -1379.386 14.9731 // If in this area, then the taxi spawns in the north", false, gui.tabCode)
+	gui.parseButton = guiCreateButton(1, 442, 980, 34, "Parse", false, gui.tabCode)
 
 	-- List
-	gui.list = guiCreateGridList(0,0,1000,450,false,gui.tabList)
+	gui.list = guiCreateGridList(1,1,980,440,false,gui.tabList)
 	gui.lineColumn = guiGridListAddColumn(gui.list, "Line", 0.05)
 	gui.codeColumn = guiGridListAddColumn(gui.list, "Code", 0.85)
 	gui.stateColumn = guiGridListAddColumn(gui.list, "State", 0.1)
 
-	gui.previewEnabled = guiCreateCheckBox(10,450,100,30,"Preview",false,false,gui.tabList)
-	gui.previewCameraEnabled = guiCreateCheckBox(100,450,100,30,"Preview Camera",false,false,gui.tabList)
+	gui.previewEnabled = guiCreateCheckBox(10,443,100,30,"Preview",false,false,gui.tabList)
+	gui.previewCameraEnabled = guiCreateCheckBox(100,443,100,30,"Preview Camera",false,false,gui.tabList)
 
 	-- Settings
 	gui.clearWeatherButton = guiCreateCheckBox(12, 14, 200, 25, "Clear weather", false, false, gui.tabSettings)
 	gui.morningTime = guiCreateButton(300, 14, 100, 25, "Set to morning", false, gui.tabSettings)
 	gui.dayTime = guiCreateButton(420, 14, 100, 25, "Set to day", false, gui.tabSettings)
 	gui.fixedTime = guiCreateCheckBox(540, 14, 200, 30, "Fixed Time", false, false, gui.tabSettings)
-	gui.help = guiCreateMemo(10, 50, 800, 300, "You must enter 'showcol' into the console to show the wireframes\n\nShorcuts in List:\nW/S to go up/down the list\nG to move the camera to the selected entry (only if wireframe is showing)\nE to show wireframe for selected entry\nT to teleport to selected entry and give jetpack (only if wireframe is showing)", false, gui.tabSettings)
+	gui.help = guiCreateMemo(10, 50, 800, 300, "You must enter 'showcol' into the console to show the wireframes.\n\nF4 or Q to toggle this GUI (if in map editor, F4 toggles HUD as well).\n\nShorcuts in List:\nW/S to go up/down the list\nG to move the camera to the selected entry (only if wireframe is showing)\nE to show wireframe for selected entry\nT to teleport to selected entry and give jetpack (only if wireframe is showing)\n\nYou can use the settings above to create better screenshot conditions.", false, gui.tabSettings)
 
-	gui.closeButton = guiCreateButton(0, 520, 1000, 30, "Close", false, gui.window)
+	gui.closeButton = guiCreateButton(0, 528, 1000, 30, "Close", false, gui.window)
 
 	addEventHandler("onClientGUIClick", gui.window, handleClick)
 	addEventHandler("onClientGUIDoubleClick", gui.window, handleDoubleClick)
